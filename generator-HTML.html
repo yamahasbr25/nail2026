@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nails Art - Static HTML Generator Tool</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #F9F6F0;
+            color: #4A4341;
+            padding: 40px 20px;
+        }
+        .wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        h2 {
+            color: #C88EA7;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #F0E5E1;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; }
+        input[type="text"], textarea {
+            width: 100%; padding: 12px; border: 1px solid #ccc;
+            border-radius: 6px; font-size: 1rem; font-family: inherit; transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus, textarea:focus { border-color: #C88EA7; outline: none; }
+        textarea { height: 350px; resize: vertical; font-family: monospace; font-size: 0.95rem; background-color: #f9f9f9; }
+        .note { font-size: 0.85rem; color: #666; margin-top: 5px; font-style: italic; }
+        .recommendation-box {
+            margin-top: 10px; padding: 12px; background-color: #F0E5E1;
+            border-left: 4px solid #C88EA7; border-radius: 4px; font-size: 0.95rem; display: none;
+        }
+        .recommendation-box a { color: #C88EA7; font-weight: 700; text-decoration: none; word-break: break-all; }
+        .recommendation-box a:hover { text-decoration: underline; color: #a56a83; }
+        button {
+            width: 100%; background-color: #C88EA7; color: white; border: none; padding: 14px;
+            font-size: 1.1rem; font-weight: 700; border-radius: 6px; cursor: pointer; transition: background 0.3s ease;
+        }
+        button:hover { background-color: #a56a83; }
+        footer-tool { display: block; text-align: center; margin-top: 20px; font-size: 0.85rem; color: #999; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <h2>Nails Art Generator (HTML Mode)</h2>
+    <div class="form-group">
+        <label for="keyword">Main Keyword:</label>
+        <input type="text" id="keyword" placeholder="Example: french tip nails" autocomplete="off">
+        <div class="note">This keyword will be used as the HTML file name and AGC image query.</div>
+        <div id="rec-box" class="recommendation-box">
+            Recommended Link: <br><a href="#" id="rec-link" target="_blank">-</a>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="content">Article Content (HTML Format):</label>
+        <textarea id="content" placeholder="<h1>Article Title</h1>&#10;<p>First paragraph here...</p>&#10;<h2>Sub Title</h2>&#10;<ul>&#10;  <li>1. Step 1</li>&#10;</ul>"></textarea>
+    </div>
+    <button onclick="generateAndDownload()">Generate & Download Article</button>
+    <footer-tool>&copy; 2026 Nails Art Automation Tool Suite</footer-tool>
+</div>
+<script>
+let baseDomain = "https://stylestrands.github.io/hair-trends/"; 
+fetch('domain.txt')
+    .then(response => response.text())
+    .then(data => {
+        let domain = data.trim();
+        if (domain) {
+            domain = domain.replace(/\[.*?\]\s*/g, '').replace(/\s*/gi, '').trim();
+            if (!domain.startsWith('http://') && !domain.startsWith('https://')) {
+                domain = 'https://' + domain;
+            }
+            if (!domain.endsWith('/')) {
+                domain += '/';
+            }
+            baseDomain = domain;
+        }
+    })
+    .catch(err => console.log('domain.txt not found.'));
+
+const keywordInput = document.getElementById('keyword');
+const recBox = document.getElementById('rec-box');
+const recLink = document.getElementById('rec-link');
+
+function capitalizeEachWord(str) {
+    if (!str) return '';
+    return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
+keywordInput.addEventListener('input', function() {
+    const keywordText = this.value.trim();
+    if (keywordText.length > 0) {
+        const slug = keywordText.toLowerCase()
+                                .replace(/\s+/g, '-')
+                                .replace(/[^a-z0-9-]/g, '')
+                                .replace(/-+/g, '-');
+        const fullUrl = baseDomain + slug;
+        recLink.href = fullUrl;
+        recLink.textContent = fullUrl;
+        recBox.style.display = 'block';
+    } else {
+        recBox.style.display = 'none';
+    }
+});
+
+function generateAndDownload() {
+    const keywordInputVal = document.getElementById('keyword').value.trim();
+    const contentInput = document.getElementById('content').value.trim();
+    if (!keywordInputVal || !contentInput) {
+        alert('Please fill out both the Keyword and HTML Content fields!');
+        return;
+    }
+    const keywordSlug = keywordInputVal.toLowerCase()
+                                    .replace(/\s+/g, '-')
+                                    .replace(/[^a-z0-9-]/g, '')
+                                    .replace(/-+/g, '-');
+    const fileName = keywordSlug + '.html';
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(contentInput, 'text/html');
+    const firstH1 = doc.querySelector('h1');
+    let h1Title = "";
+    if (firstH1) {
+        h1Title = firstH1.textContent.trim();
+    } else {
+        h1Title = capitalizeEachWord(keywordInputVal);
+        const newH1 = document.createElement('h1');
+        newH1.textContent = h1Title;
+        doc.body.insertBefore(newH1, doc.body.firstChild);
+    }
+    
+    // Hidden article block kept as original for AGC purposes
+    const hiddenArticleDiv = document.createElement('div');
+    hiddenArticleDiv.style.cssText = "display:none; visibility:hidden;";
+    hiddenArticleDiv.innerHTML = `
+        <h1>The Ultimate Guide to Making Money Online: Wealth Creation Through Trading and Cryptocurrency</h1> <p>In today's rapidly evolving digital economy, learning how to make money online has transitioned from a niche concept into a highly lucrative global industry. Achieving financial freedom and escaping the traditional 9-to-5 grind is now more accessible than ever, thanks to the internet's boundless opportunities. Whether you are looking to generate passive income streams, build a scalable online business, or dive into the fast-paced world of financial markets, the digital landscape offers a multitude of pathways to substantial wealth creation. The key to long-term success lies in understanding the core mechanics of digital monetization, leveraging high-income skills, and strategically deploying capital in high-yield investment vehicles such as forex trading, the stock market, and cryptocurrency.</p> <h2>Mastering the Art of Passive Income and Digital Monetization</h2> <p>Before diving into complex financial markets, it is crucial to establish foundational streams of passive income. Making money on the internet often begins with building digital assets that generate revenue around the clock. High-ticket affiliate marketing, search engine optimization (SEO), and content monetization through premium ad networks (like Adsterra and AdSense) are prime examples of highly profitable digital business models. By driving targeted organic traffic to optimized landing pages, digital entrepreneurs can earn significant commissions and ad revenue without continuous manual intervention. Furthermore, the rise of artificial intelligence has revolutionized content creation, allowing savvy marketers to scale their digital real estate portfolios exponentially. Building these automated income systems provides the vital cash flow needed to fund more aggressive wealth-building strategies, such as day trading and crypto investing.</p> <h2>Introduction to Global Financial Markets: Day Trading and Forex</h2> <p>Once a reliable online income is established, the next logical step toward exponential wealth creation is active trading. Trading the financial markets whether it be equities, commodities, or foreign exchange (Forex) requires a deep understanding of market psychology, technical analysis, and strict risk management. Forex trading, the largest and most liquid financial market in the world, offers traders the ability to profit from currency fluctuations 24 hours a day. Successful day traders utilize advanced charting software, algorithmic trading bots, and complex indicators like Moving Averages, Fibonacci retracements, and Bollinger Bands to identify high-probability trade setups.</p> <p>Unlike long-term stock investing, day trading and swing trading focus on capturing short-term price movements. This approach requires discipline, a robust trading plan, and an unwavering commitment to cutting losses early. Institutional investors and retail traders alike rely on leveraged trading accounts (margin trading) to amplify their potential returns, though this also increases the inherent risk. Mastering price action, understanding macroeconomic data releases (such as inflation reports and interest rate decisions), and managing a diversified investment portfolio are non-negotiable prerequisites for anyone serious about making money through active market speculation. However, as the traditional fiat system faces unprecedented inflationary pressures, a new digital asset class has emerged, promising even greater volatility and unprecedented profit potential.</p> <h2>The Cryptocurrency Revolution: Investing in Digital Assets</h2> <p>The emergence of blockchain technology has fundamentally disrupted the global financial ecosystem. Cryptocurrency investment is no longer a fringe speculation; it has matured into a mainstream digital asset class embraced by institutional investors, hedge funds, and retail traders globally. Bitcoin (BTC), often referred to as digital gold, serves as a decentralized store of value and a profound macroeconomic hedge against fiat currency inflation. Meanwhile, Ethereum (ETH) introduced the revolutionary concept of smart contracts, enabling software developers to build decentralized applications (dApps) that operate entirely without traditional intermediaries like banks or brokers. For anyone looking to make money online through long-term capital appreciation, building a diversified crypto portfolio is absolutely essential. Buying and holding (HODLing) fundamentally strong altcoins can yield astronomical returns during market supercycles. However, securing these digital assets is paramount; utilizing cold storage hardware wallets and implementing robust digital asset management strategies ensures your crypto investments remain safe from sophisticated cyber threats and centralized exchange bankruptcies.</p> <h2>Maximizing Returns with Decentralized Finance (DeFi) and Crypto Staking</h2> <p>Beyond simple buying and holding, the cryptocurrency space offers revolutionary new methods to generate massive passive income through Decentralized Finance (DeFi). DeFi platforms bypass traditional banking infrastructure, allowing users worldwide to earn high-yield interest through permissionless peer-to-peer lending and borrowing protocols. Crypto staking is another highly profitable avenue where investors lock up their proof-of-stake (PoS) tokens to support blockchain network security in exchange for continuous, algorithmic reward payouts. Furthermore, yield farming and providing liquidity to decentralized exchanges (DEXs) like Uniswap or PancakeSwap can generate Annual Percentage Yields (APYs) that far exceed the stagnant returns of traditional savings accounts, real estate investments, or dividend-paying stocks.</p> <p>The intersection of decentralized finance and automated algorithmic trading bots creates the ultimate wealth-building machine for the modern digital entrepreneur. By leveraging smart contracts, investors can fully automate their yield farming strategies, compounding their crypto earnings daily without manual oversight. Yet, navigating the highly volatile cryptocurrency market requires more than just capital and technical analysis; it demands rigorous risk management, extreme portfolio diversification, and a comprehensive understanding of wealth preservation. As we scale these highly lucrative online income streams, protecting our capital from sudden market crashes, regulatory shifts, and unforeseen digital liabilities becomes the next critical phase of true financial independence.</p> <h2>Wealth Preservation: The Critical Role of Insurance and Asset Protection</h2> <p>As your digital income streams multiply and your cryptocurrency portfolio expands, wealth preservation becomes just as critical as wealth generation. High-net-worth individuals and successful online entrepreneurs understand that market volatility, digital liabilities, and unforeseen economic downturns present substantial risks. Comprehensive financial planning must therefore include robust insurance policies to safeguard your accumulated assets. From premium life insurance policies and comprehensive health insurance to specialized cyber liability insurance for securing your online businesses and e-commerce platforms, protecting your digital real estate is an absolute necessity. Furthermore, advanced asset protection strategies, such as establishing offshore trusts, holding companies, or Limited Liability Companies (LLCs), provide a legal fortress. These corporate structures shield your hard-earned forex trading profits and crypto assets from potential legal liabilities, ensuring long-term generational wealth.</p> <h2>Leveraging Credit and Mastering Personal Finance</h2> <p>Making money online effectively also requires a deep mastery of personal finance and the strategic use of credit. Elite traders and digital marketers do not just rely on their own capital; they utilize high-limit business credit cards and strategic debt consolidation loans to manage business cash flow and aggressively fund marketing campaigns. Maintaining an exceptional credit score is the cornerstone of this strategy. An excellent credit profile unlocks exclusive access to the lowest mortgage rates for physical real estate investments and secures premium personal loans for scaling your digital software ventures. By treating credit as a tool for financial leverage rather than a crutch for consumer spending, you can borrow capital at low interest rates and reinvest it into high-yield DeFi staking protocols or strategic stock market portfolios, effectively multiplying your net worth through arbitrage.</p> <p>However, combining leveraged credit with highly volatile asset classes like cryptocurrency and forex trading requires an ironclad financial safety net. Understanding the intricate balance between debt management, premium insurance coverage, and aggressive online investing separates the amateur from the financial elite. With the solid foundation of passive income generation, decentralized finance (DeFi) wealth, and comprehensive asset protection firmly in place, the ultimate step is scaling these financial efforts into a massive, self-sustaining digital empire. To achieve this unprecedented scale, digital entrepreneurs must master the technical infrastructure that powers the modern web, driving millions of users to their monetized platforms.</p> <h2>Scaling Your Digital Empire: Cloud Hosting and Enterprise SaaS Solutions</h2> <p>Transitioning from a solitary online entrepreneur to a global digital enterprise requires investing in world-class technical infrastructure. Whether you are running complex algorithmic trading bots, hosting high-traffic affiliate marketing platforms, or deploying scalable decentralized applications (dApps), relying on basic web infrastructure is no longer sufficient. Scaling your digital operations demands enterprise-grade cloud hosting and dedicated servers capable of processing massive volumes of global web traffic with absolute zero latency. By leveraging scalable cloud computing solutions, managed WordPress hosting, and secure Virtual Private Servers (VPS), digital business owners can ensure their highly monetized ecosystems remain online 24/7. Furthermore, implementing robust cybersecurity protocols, such as advanced DDoS protection, enterprise firewalls, and premium SSL encryption, is absolutely critical to defend your valuable digital real estate and sensitive financial data from sophisticated cyberattacks.</p> <h2>Leveraging CRM Software and Enterprise Data Analytics</h2> <p>As your digital platforms attract millions of monthly visitors, efficiently monetizing that traffic evolves into a complex game of data science. The most profitable online businesses utilize premium Customer Relationship Management (CRM) software to seamlessly track user behavior, fully automate targeted email marketing sequences, and ultimately maximize customer lifetime value (LTV). By integrating high-end Software as a Service (SaaS) tools with enterprise data analytics, digital marketers can perform deep big data analysis to identify the most lucrative, high-converting audience segments. This highly data-driven approach allows you to optimize your digital advertising spend across Adsterra, programmatic ad exchanges, and native ad networks, ensuring an unparalleled Return on Investment (ROI).</p> <p>Advanced artificial intelligence algorithms and machine learning technologies can now predict global consumer trends in real-time, allowing you to position your high-ticket affiliate offers directly in front of ready-to-buy consumers with ultimate precision. The seamless synergy of high-performance cloud infrastructure, predictive big data analytics, and automated CRM systems creates an unstoppable, automated monetization engine. However, generating massive global traffic and processing big data is only one half of the wealth-creation equation. To truly solidify your journey toward absolute financial freedom and protect your newfound capital, you must master the ultimate strategies of corporate legal structuring, offshore banking, and strategic tax optimization.</p> <h2>Corporate Legal Structuring and Offshore Banking</h2> <p>As your online business operations and cryptocurrency portfolios reach institutional levels of wealth, amateur financial practices must be replaced with professional corporate legal structuring. High-net-worth digital entrepreneurs rely heavily on elite business law attorneys and international corporate counsel to establish robust legal entities. Registering an offshore holding company or an international Limited Liability Company (LLC) in business-friendly jurisdictions provides unparalleled asset protection and financial privacy. Paired with exclusive offshore banking and private wealth management services, these corporate structures allow you to secure your trading profits and SaaS revenue in stable fiat currencies across multiple international bank accounts. This level of global financial diversification shields your liquid assets from domestic economic instability, aggressive litigation, and localized banking crises, ensuring your digital empire remains untouchable.</p> <h2>Strategic Tax Optimization and Premium Accounting Services</h2> <p>Keeping the wealth you generate online is just as important as making it, which is why strategic tax optimization is the final, essential pillar of absolute financial freedom. Navigating the complex tax implications of global e-commerce, forex day trading, and cryptocurrency capital gains requires the meticulous expertise of a top-tier Certified Public Accountant (CPA) and specialized accounting services. Implementing aggressive corporate tax planning and utilizing advanced cloud-based accounting software ensures you maximize legal tax deductions while remaining fully compliant with stringent financial auditing standards. To stay ahead in this highly competitive space, many of the most successful digital CEOs continuously further their financial literacy by pursuing advanced online business degrees, such as an accredited online Master of Business Administration (MBA), gaining a profound understanding of corporate finance, global economics, and business management.</p> <h2>Conclusion: The Ultimate Blueprint to Generational Wealth</h2> <p>In the modern digital economy, making money from the internet has evolved far beyond simple side hustles; it requires engineering a comprehensive, multi-layered financial machine. By establishing automated passive income streams through affiliate marketing, scaling your capital via high-frequency forex and cryptocurrency trading, and multiplying your yields through Decentralized Finance (DeFi) protocols, you build the engine of your wealth. Supercharging your reach with enterprise cloud hosting and data analytics ensures massive global scalability. Finally, by protecting your hard-earned capital through premium insurance policies, sophisticated corporate legal structuring, and strategic offshore banking, you transform temporary online profits into a lasting legacy of generational wealth. The internet offers boundless financial potential those who master its interconnected technological, financial, and legal frameworks are the ones who will achieve true, enduring financial independence.</p>
+    `;
+    const updatedH1 = doc.querySelector('h1');
+    if (updatedH1) {
+        updatedH1.parentNode.insertBefore(hiddenArticleDiv, updatedH1);
+    } else {
+        doc.body.insertBefore(hiddenArticleDiv, doc.body.firstChild);
+    }
+    const currentH1 = doc.querySelector('h1');
+    const adCenter = document.createElement('center');
+    adCenter.innerHTML = `<script src="https://seribudollarperhari.github.io/banner/ad2.js"><\/script>`;
+    if (currentH1 && currentH1.nextSibling) {
+        doc.body.insertBefore(adCenter, currentH1.nextSibling);
+    } else if (currentH1) {
+        currentH1.parentNode.appendChild(adCenter);
+    } else {
+        doc.body.appendChild(adCenter);
+    }
+    const relatedQueries = [
+        `${keywordInputVal} trendy look`,
+        `${keywordInputVal} modern design`,
+        `${keywordInputVal} classic style`,
+        `${keywordInputVal} best step by step`,
+        `${keywordInputVal} salon style`,
+        `${keywordInputVal} beautiful nails`
+    ];
+    
+    const children = Array.from(doc.body.children);
+    let pCount = 0;
+    let imgIndex = 0;
+    children.forEach((el) => {
+        if (el.tagName.toLowerCase() === 'p' && el.parentElement === doc.body) {
+            pCount++;
+            if (pCount === 1 || (pCount > 1 && (pCount - 1) % 2 === 0)) {
+                const queryIndex = imgIndex % relatedQueries.length;
+                const chosenImageQuery = relatedQueries[queryIndex];
+                imgIndex++;
+                const agcTargetSlug = chosenImageQuery.replace(/\s+/g, '-').toLowerCase();
+                const agcTargetUrl = `${baseDomain}detail.html?q=${agcTargetSlug}`;
+                
+                // Set 2:3 Ratio parameter w=600&h=900
+                const imgUrl = `https://tse1.mm.bing.net/th?q=${encodeURIComponent(chosenImageQuery + ' nail art')}&w=600&h=900&c=7&rs=1&p=0&dpr=1.5&pid=1.7`;
+                
+                const imgDiv = document.createElement('div');
+                imgDiv.className = 'article-image';
+                imgDiv.style.cssText = 'text-align: center; margin: 25px 0;';
+                imgDiv.innerHTML = `
+                    <a href="${agcTargetUrl}" title="View more about ${chosenImageQuery}" target="_blank">
+                        <img src="${imgUrl}" alt="${h1Title} - ${chosenImageQuery}" style="width: 100%; max-width: 800px; height: auto; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                    </a>
+                `;
+                if (el.nextSibling) {
+                    el.parentNode.insertBefore(imgDiv, el.nextSibling);
+                } else {
+                    el.parentNode.appendChild(imgDiv);
+                }
+            }
+        }
+    });
+    
+    const articleBodyHtml = doc.body.innerHTML;
+    let metaDesc = h1Title;
+    const bodyParagraphs = doc.body.querySelectorAll('p');
+    for(let p of bodyParagraphs){
+        if(p.parentElement === doc.body) {
+            metaDesc = p.textContent.substring(0, 150) + '...';
+            break;
+        }
+    }
+    const finalHtmlOutput = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${h1Title} | Nails Art</title>
+    <meta name="description" content="${metaDesc}">
+    <meta name="robots" content="index, follow">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <center><script src="https://seribudollarperhari.github.io/banner/ad1.js"><\/script></center>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo-link">
+                <div class="logo">Nails Art</div>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <article class="main-article">
+                <div class="article-content">
+                    ${articleBodyHtml}
+                </div>
+            </article>
+            <center><script src="https://seribudollarperhari.github.io/banner/ad3.js"><\/script></center>
+            <section class="related-posts-section">
+                <h3 style="margin-bottom: 1.5rem; text-align: center; font-size: 1.8rem; color: #4A4341;">More Trendy Nail Art</h3>
+                <div id="related-posts-container" class="content-grid"></div>
+            </section>
+            <center><script src="https://seribudollarperhari.github.io/banner/nativ.js"><\/script></center>
+        </div>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Nails Art - Gorgeous Manicures. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+        (function() {
+            const keyword = "${keywordInputVal}";
+            const displayed = new Set([keyword.toLowerCase()]);
+            function generateRelated() {
+                const script = document.createElement('script');
+                script.src = 'https://suggestqueries.google.com/complete/search?client=youtube&jsonp=handleRelatedSuggest&hl=en&q=' + encodeURIComponent(keyword + " nail art");
+                document.head.appendChild(script);
+                script.onload = () => script.remove();
+                script.onerror = () => loadFallback();
+            }
+            window.handleRelatedSuggest = function(data) {
+                const suggestions = data[1];
+                if (!suggestions || suggestions.length === 0) {
+                    loadFallback();
+                    return;
+                }
+                renderPosts(suggestions.map(item => typeof item === 'string' ? item : item[0]));
+            };
+            function loadFallback() {
+                fetch('keyword.txt')
+                    .then(res => res.text())
+                    .then(data => {
+                        const keywords = data.split('\\n').map(k => k.trim()).filter(k => k.length > 0);
+                        for (let i = keywords.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [keywords[i], keywords[j]] = [keywords[j], keywords[i]];
+                        }
+                        renderPosts(keywords);
+                    })
+                    .catch(e => console.log('Please setup keyword.txt in hosting.'));
+            }
+            function renderPosts(items) {
+                const container = document.getElementById('related-posts-container');
+                if (!container) return;
+                let html = '';
+                let count = 0;
+                const hookWords = ['Trendy', 'Stylish', 'Modern', 'Classic', 'Elegant', 'Chic', 'Gorgeous', 'Best', 'Amazing', 'Flawless'];
+                const suffixWords = ['Nail Art', 'Nails', 'Manicure', 'Design', 'Idea'];
+                items.forEach(item => {
+                    if(count >= 5) return;
+                    let relatedTerm = item.replace(/nail art|nails|manicure/gi, '').trim();
+                    if(!relatedTerm) relatedTerm = item;
+                    const termLower = relatedTerm.toLowerCase();
+                    if(displayed.has(termLower)) return;
+                    displayed.add(termLower);
+                    count++;
+                    const slug = relatedTerm.replace(/\\s+/g, '-').toLowerCase();
+                    const linkUrl = '${baseDomain}detail.html?q=' + slug;
+                    const queryImg = relatedTerm + " nail art manicure";
+                    const imgUrl = 'https://tse1.mm.bing.net/th?q=' + encodeURIComponent(queryImg) + '&w=400&h=600&c=7&rs=1&p=0&dpr=1.5&pid=1.7';
+                    const rHook = hookWords[Math.floor(Math.random() * hookWords.length)];
+                    const rSuffix = suffixWords[Math.floor(Math.random() * suffixWords.length)];
+                    const rTitle = rHook + ' ' + relatedTerm.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') + ' ' + rSuffix;
+                    html += '<article class="content-card"><a href="' + linkUrl + '"><img src="' + imgUrl + '" alt="' + rTitle + '" loading="lazy"><div class="content-card-body"><h3>' + rTitle + '</h3></div></a></article>';
+                });
+                container.innerHTML = html;
+            }
+            generateRelated();
+        })();
+    <\/script>
+</body>
+</html>`;
+    const blob = new Blob([finalHtmlOutput], { type: 'text/html;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Nail Art...</title>
+    <script>
+        (function() {
+            var currentPath = window.location.pathname;
+            var pathSegments = currentPath.split('/').filter(Boolean);
+            var keyword = pathSegments.pop();
+            
+            if (keyword) {
+                keyword = keyword.replace(/\.html$/, '');
+                var queryParams = window.location.search;
+                var basePath = '/' + pathSegments.join('/');
+                if (basePath === '/') basePath = '';
+                
+                var redirectUrl = basePath + '/detail.html?q=' + encodeURIComponent(keyword);
+                
+                if (queryParams) {
+                    redirectUrl += '&' + queryParams.substring(1);
+                }
+                window.location.replace(redirectUrl);
+            } else {
+                window.location.replace('/index.html');
+            }
+        })();
+    </script>
+</head>
+<body style="background-color: #F9F6F0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Open Sans', sans-serif; color: #4A4341;">
+    <div style="text-align: center;">
+        <h2 style="color: #C88EA7;">Preparing your nail art...</h2>
+        <p style="color: #666;">Please wait a moment while we load the design details.</p>
+    </div>
+</body>
+</html>

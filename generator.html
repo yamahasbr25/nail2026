@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nails Art - Static Generator Tool</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Open Sans', sans-serif; background-color: #F9F6F0; color: #4A4341; padding: 40px 20px; }
+        .wrapper { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h2 { color: #C88EA7; margin-bottom: 20px; font-size: 1.8rem; border-bottom: 2px solid #F0E5E1; padding-bottom: 10px; text-align: center; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: 600; margin-bottom: 8px; color: #444; }
+        input[type="text"], textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; font-family: inherit; transition: border-color 0.3s ease; }
+        input[type="text"]:focus, textarea:focus { border-color: #C88EA7; outline: none; }
+        textarea { height: 300px; resize: vertical; }
+        .note { font-size: 0.85rem; color: #666; margin-top: 5px; font-style: italic; }
+        .recommendation-box { margin-top: 10px; padding: 12px; background-color: #F0E5E1; border-left: 4px solid #C88EA7; border-radius: 4px; font-size: 0.95rem; display: none; }
+        .recommendation-box a { color: #C88EA7; font-weight: 700; text-decoration: none; word-break: break-all; }
+        .recommendation-box a:hover { text-decoration: underline; color: #a56a83; }
+        button { width: 100%; background-color: #C88EA7; color: white; border: none; padding: 14px; font-size: 1.1rem; font-weight: 700; border-radius: 6px; cursor: pointer; transition: background 0.3s ease; }
+        button:hover { background-color: #a56a83; }
+        footer-tool { display: block; text-align: center; margin-top: 20px; font-size: 0.85rem; color: #999; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <h2>Nails Art Generator (SEO Optimized)</h2>
+    <div class="form-group">
+        <label for="keyword">Main Keyword:</label>
+        <input type="text" id="keyword" placeholder="Example: french tip nails" autocomplete="off">
+        <div class="note">This keyword will be used as the HTML file name.</div>
+        <div id="rec-box" class="recommendation-box">
+            Recommended Link: <br><a href="#" id="rec-link" target="_blank">-</a>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="content">Article Content:</label>
+        <textarea id="content" placeholder="The very first line will be H1 Article Title&#10;&#10;First paragraph goes here...&#10;&#10;Second paragraph goes here...&#10;&#10;And so on..."></textarea>
+    </div>
+    <button onclick="generateAndDownload()">Generate & Download Article</button>
+    <footer-tool>&copy; 2026 Nails Art Automation Tool Suite</footer-tool>
+</div>
+<script>
+let baseDomain = "https://stylestrands.github.io/hair-trends/"; 
+fetch('domain.txt')
+    .then(response => response.text())
+    .then(data => {
+        let domain = data.trim();
+        if (domain) {
+            domain = domain.replace(/\[.*?\]\s*/g, '').replace(/\s*/gi, '').trim();
+            if (!domain.startsWith('http://') && !domain.startsWith('https://')) {
+                domain = 'https://' + domain;
+            }
+            if (!domain.endsWith('/')) {
+                domain += '/';
+            }
+            baseDomain = domain;
+        }
+    })
+    .catch(err => console.log('domain.txt not found.'));
+
+const keywordInput = document.getElementById('keyword');
+const recBox = document.getElementById('rec-box');
+const recLink = document.getElementById('rec-link');
+
+keywordInput.addEventListener('input', function() {
+    const keywordText = this.value.trim();
+    if (keywordText.length > 0) {
+        const slug = keywordText.toLowerCase()
+                                .replace(/\s+/g, '-')
+                                .replace(/[^a-z0-9-]/g, '')
+                                .replace(/-+/g, '-');
+        const fullUrl = baseDomain + slug;
+        recLink.href = fullUrl;
+        recLink.textContent = fullUrl;
+        recBox.style.display = 'block';
+    } else {
+        recBox.style.display = 'none';
+    }
+});
+
+function generateAndDownload() {
+    const keywordInputVal = document.getElementById('keyword').value.trim();
+    const contentInput = document.getElementById('content').value.trim();
+    if (!keywordInputVal || !contentInput) {
+        alert('Please fill out both the Keyword and Article Content fields!');
+        return;
+    }
+    const keywordSlug = keywordInputVal.toLowerCase()
+                                    .replace(/\s+/g, '-')
+                                    .replace(/[^a-z0-9-]/g, '')
+                                    .replace(/-+/g, '-');
+    const fileName = keywordSlug + '.html';
+    const lines = contentInput.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    if (lines.length < 1) {
+        alert('Article content is invalid or empty!');
+        return;
+    }
+    const h1Title = lines[0]; 
+    const remainingParagraphs = lines.slice(1);
+    
+    // Hidden article block simplified here for demonstration (but use full text as in original if needed)
+    let articleBodyHtml = `<div style="display:none; visibility:hidden;">
+        <h1>The Ultimate Guide to Making Money Online...</h1> <p>Full text goes here in original production...</p>
+        </div>\n`;
+    
+    articleBodyHtml += `<h1>${h1Title}</h1>\n`;
+    articleBodyHtml += `<center><script src="https://seribudollarperhari.github.io/banner/ad2.js"><\/script></center>\n`;
+    
+    const relatedQueries = [
+        `${keywordInputVal} trendy look`,
+        `${keywordInputVal} modern design`,
+        `${keywordInputVal} classic style`,
+        `${keywordInputVal} best step by step`,
+        `${keywordInputVal} salon style`,
+        `${keywordInputVal} beautiful nails`
+    ];
+    
+    remainingParagraphs.forEach((paragraphText, index) => {
+        if (index === 1 || (index > 1 && index % 2 === 1)) {
+            const queryIndex = Math.floor(index / 2) % relatedQueries.length;
+            const chosenImageQuery = relatedQueries[queryIndex];
+            const agcTargetSlug = chosenImageQuery.replace(/\s+/g, '-').toLowerCase();
+            const agcTargetUrl = `${baseDomain}detail.html?q=${agcTargetSlug}`;
+            
+            // Adjust to 2:3 ratio API params
+            const imgUrl = `https://tse1.mm.bing.net/th?q=${encodeURIComponent(chosenImageQuery + ' nail art')}&w=600&h=900&c=7&rs=1&p=0&dpr=1.5&pid=1.7`;
+            
+            articleBodyHtml += `
+            <div class="article-image" style="text-align: center; margin: 25px 0;">
+                <a href="${agcTargetUrl}" title="View more about ${chosenImageQuery}" target="_blank">
+                    <img src="${imgUrl}" alt="${h1Title} - ${chosenImageQuery}" style="width: 100%; max-width: 800px; height: auto; aspect-ratio: 2/3; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.01)'" onmouseout="this.style.transform='scale(1)'">
+                </a>
+            </div>\n`;
+        }
+        articleBodyHtml += `<p>${paragraphText}</p>\n`;
+    });
+    
+    const metaDesc = remainingParagraphs[0] ? remainingParagraphs[0].substring(0, 150) + '...' : h1Title;
+    
+    const finalHtmlOutput = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${h1Title} | Nails Art</title>
+    <meta name="description" content="${metaDesc}">
+    <meta name="robots" content="index, follow">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <center><script src="https://seribudollarperhari.github.io/banner/ad1.js"><\/script></center>
+    <header>
+        <div class="container">
+            <a href="index.html" class="logo-link">
+                <div class="logo">Nails Art</div>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="privacy.html">Privacy Policy</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            <article class="main-article">
+                <div class="article-content">
+                    ${articleBodyHtml}
+                </div>
+            </article>
+            <center><script src="https://seribudollarperhari.github.io/banner/ad3.js"><\/script></center>
+            <section class="related-posts-section">
+                <h3 style="margin-bottom: 1.5rem; text-align: center; font-size: 1.8rem; color: #4A4341;">More Trendy Nail Art</h3>
+                <div id="related-posts-container" class="content-grid"></div>
+            </section>
+            <center><script src="https://seribudollarperhari.github.io/banner/nativ.js"><\/script></center>
+        </div>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Nails Art - Gorgeous Manicures. All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+        (function() {
+            const keyword = "${h1Title}";
+            const displayed = new Set([keyword.toLowerCase()]);
+            function generateRelated() {
+                const script = document.createElement('script');
+                script.src = 'https://suggestqueries.google.com/complete/search?client=youtube&jsonp=handleRelatedSuggest&hl=en&q=' + encodeURIComponent(keyword + " nail art");
+                document.head.appendChild(script);
+                script.onload = () => script.remove();
+                script.onerror = () => loadFallback();
+            }
+            window.handleRelatedSuggest = function(data) {
+                const suggestions = data[1];
+                if (!suggestions || suggestions.length === 0) {
+                    loadFallback();
+                    return;
+                }
+                renderPosts(suggestions.map(item => typeof item === 'string' ? item : item[0]));
+            };
+            function loadFallback() {
+                fetch('keyword.txt')
+                    .then(res => res.text())
+                    .then(data => {
+                        const keywords = data.split('\\n').map(k => k.trim()).filter(k => k.length > 0);
+                        for (let i = keywords.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [keywords[i], keywords[j]] = [keywords[j], keywords[i]];
+                        }
+                        renderPosts(keywords);
+                    })
+                    .catch(e => console.log('Please setup keyword.txt in hosting.'));
+            }
+            function renderPosts(items) {
+                const container = document.getElementById('related-posts-container');
+                if (!container) return;
+                let html = '';
+                let count = 0;
+                const hookWords = ['Trendy', 'Stylish', 'Modern', 'Classic', 'Elegant', 'Chic', 'Gorgeous', 'Best', 'Amazing', 'Flawless'];
+                const suffixWords = ['Nail Art', 'Nails', 'Manicure', 'Design', 'Idea'];
+                items.forEach(item => {
+                    if(count >= 5) return;
+                    let relatedTerm = item.replace(/nail art|nails|manicure/gi, '').trim();
+                    if(!relatedTerm) relatedTerm = item;
+                    const termLower = relatedTerm.toLowerCase();
+                    if(displayed.has(termLower)) return;
+                    displayed.add(termLower);
+                    count++;
+                    const slug = relatedTerm.replace(/\\s+/g, '-').toLowerCase();
+                    const linkUrl = '${baseDomain}detail.html?q=' + slug;
+                    const queryImg = relatedTerm + " nail art manicure";
+                    const imgUrl = 'https://tse1.mm.bing.net/th?q=' + encodeURIComponent(queryImg) + '&w=400&h=600&c=7&rs=1&p=0&dpr=1.5&pid=1.7';
+                    const rHook = hookWords[Math.floor(Math.random() * hookWords.length)];
+                    const rSuffix = suffixWords[Math.floor(Math.random() * suffixWords.length)];
+                    const rTitle = rHook + ' ' + relatedTerm.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') + ' ' + rSuffix;
+                    html += '<article class="content-card"><a href="' + linkUrl + '"><img src="' + imgUrl + '" alt="' + rTitle + '" loading="lazy"><div class="content-card-body"><h3>' + rTitle + '</h3></div></a></article>';
+                });
+                container.innerHTML = html;
+            }
+            generateRelated();
+        })();
+    <\/script>
+</body>
+</html>`;
+    const blob = new Blob([finalHtmlOutput], { type: 'text/html;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+}
+</script>
+</body>
+</html>
